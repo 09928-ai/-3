@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🧩 เกมทายภาพแอบมองหรรษา (เห็นนิดเดียว! 30 ข้อ)</title>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap');
+
+    :root {
+      --bg-color: #fef6e4;
+      --card-bg: #ffffff;
+      --primary: #ff6b6b;
+      --secondary: #4ecdc4;
+      --accent: #ffe66d;
+      --text: #2f2f2f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Mitr', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(#4ecdc4 10%, transparent 11%), radial-gradient(#ff6b6b 10%, transparent 11%);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    #game-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 420px;
+      border-radius: 32px;
+      border: 6px solid #2f2f2f;
+      box-shadow: 0 12px 0 #2f2f2f;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Header & Progress */
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stars-box {
+      font-size: 1.3rem;
+      background: #fff0f5;
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 3px solid #2f2f2f;
+      font-weight: 700;
+    }
+
+    .progress-box {
+      font-size: 1.1rem;
+      background: #e3f2fd;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 3px solid #2f2f2f;
+      font-weight: 700;
+    }
+
+    .speaker-btn {
+      background: var(--accent);
+      border: 3px solid #2f2f2f;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #2f2f2f;
+      transition: transform 0.1s;
+    }
+    .speaker-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #2f2f2f; }
+
+    /* Title Question */
+    .question-title {
+      font-size: 1.3rem;
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* Picture Frame */
+    .picture-frame {
+      width: 200px;
+      height: 200px;
+      background: #f0f3f8;
+      border: 5px dashed #2f2f2f;
+      border-radius: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: 20px;
+      background-image: linear-gradient(45deg, #e0e0e0 25%, transparent 25%), linear-gradient(-45deg, #e0e0e0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e0e0e0 75%), linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .emoji-target {
+      font-size: 120px;
+      line-height: 1;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* CSS Clip Path บดบังภาพให้เห็นแค่ 20% จากทางซ้าย (เห็นนิดเดียว) */
+    .tiny-hidden {
+      clip-path: inset(0 80% 0 0);
+      filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.15));
+    }
+
+    .revealed {
+      clip-path: inset(0 0 0 0) !important;
+      transform: scale(1.15);
+    }
+
+    /* Options Grid */
+    .options-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .option-btn {
+      background: #ffffff;
+      border: 4px solid #2f2f2f;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #2f2f2f;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .option-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 0 0 #2f2f2f;
+    }
+
+    .option-emoji {
+      font-size: 2.2rem;
+    }
+
+    .btn-correct {
+      background: #a8e6cf !important;
+      border-color: #1b5e20 !important;
+    }
+
+    .btn-wrong {
+      background: #ff8b94 !important;
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    .star-particle {
+      position: absolute;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: popAndFade 0.8s forwards ease-out;
+    }
+
+    @keyframes popAndFade {
+      0% { transform: translate(0, 0) scale(0.5); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(1.4); opacity: 0; }
+    }
+
+    .overlay-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .overlay-screen.hidden { display: none; }
+
+    .big-title {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .big-btn {
+      background: var(--secondary);
+      color: white;
+      border: 4px solid #2f2f2f;
+      border-radius: 30px;
+      padding: 14px 32px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2f2f2f;
+      margin-top: 20px;
+    }
+    .big-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #2f2f2f; }
+  </style>
+</head>
+<body>
+
+  <div id="game-card">
+    <!-- หน้าเริ่มต้น -->
+    <div id="start-screen" class="overlay-screen">
+      <div style="font-size: 5rem; margin-bottom: 10px;">🔍👀</div>
+      <h1 class="big-title">เกมทายภาพแอบมอง</h1>
+      <p style="font-size: 1.1rem; color: #666;">เห็นภาพแค่นิดเดียว...<br>น้องๆ จะทายถูกมั้ยนะ 30 ข้อ!</p>
+      <button id="btn-start" class="big-btn">เริ่มเลย! 🚀</button>
+    </div>
+
+    <!-- หน้าจบเกม -->
+    <div id="win-screen" class="overlay-screen hidden">
+      <div style="font-size: 5rem; margin-bottom: 10px;">🏆🎉</div>
+      <h1 class="big-title">สายตาเฉียบไวมาก!</h1>
+      <p style="font-size: 1.2rem; color: #666;" id="final-score">น้องๆ ทายถูกทั้งหมด!</p>
+      <button id="btn-restart" class="big-btn">เล่นอีกครั้ง 🔄</button>
+    </div>
+
+    <!-- ส่วนหัวเกม -->
+    <div class="header">
+      <div class="stars-box" id="score-display">⭐ 0</div>
+      <div class="progress-box" id="progress-display">1/30</div>
+      <button class="speaker-btn" id="btn-speak" title="ฟังเสียงอ่าน">🔊</button>
+    </div>
+
+    <!-- คำถาม -->
+    <div class="question-title" id="question-text">แอบมองแค่นี้... คือภาพอะไรเอ่ย?</div>
+
+    <!-- กรอบภาพโชว์นิดเดียว -->
+    <div class="picture-frame" id="frame">
+      <div class="emoji-target tiny-hidden" id="emoji-target">🐘</div>
+    </div>
+
+    <!-- ตัวเลือกตอบ 3 ข้อ -->
+    <div class="options-grid" id="options-grid"></div>
+  </div>
+
+  <script>
+    // คลังคำถาม 30 ข้อ
+    const ITEMS = [
+      { name: 'ช้าง', emoji: '🐘' },
+      { name: 'แอปเปิ้ล', emoji: '🍎' },
+      { name: 'รถยนต์', emoji: '🚗' },
+      { name: 'แมว', emoji: '🐱' },
+      { name: 'กล้วย', emoji: '🍌' },
+      { name: 'สิงโต', emoji: '🦁' },
+      { name: 'เป็ด', emoji: '🦆' },
+      { name: 'ไอศกรีม', emoji: '🍦' },
+      { name: 'สุนัข', emoji: '🐶' },
+      { name: 'สตรอเบอร์รี่', emoji: '🍓' },
+      { name: 'กระต่าย', emoji: '🐰' },
+      { name: 'เครื่องบิน', emoji: '✈️' },
+      { name: 'แตงโม', emoji: '🍉' },
+      { name: 'ปู', emoji: '🦀' },
+      { name: 'ปลา', emoji: '🐟' },
+      { name: 'รถพยาบาล', emoji: '🚑' },
+      { name: 'ส้ม', emoji: '🍊' },
+      { name: 'ไก่', emoji: '🐔' },
+      { name: 'เค้ก', emoji: '🍰' },
+      { name: 'นก', emoji: '🐦' },
+      { name: 'รถจักรยาน', emoji: '🚲' },
+      { name: 'สับปะรด', emoji: '🍍' },
+      { name: 'กบ', emoji: '🐸' },
+      { name: 'พิซซ่า', emoji: '🍕' },
+      { name: 'เต่า', emoji: '🐢' },
+      { name: 'ดอกไม้', emoji: '🌸' },
+      { name: 'รถไฟ', emoji: '🚂' },
+      { name: 'องุ่น', emoji: '🍇' },
+      { name: 'ผีเสื้อ', emoji: '🦋' },
+      { name: 'พระอาทิตย์', emoji: '☀️' }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let currentQuestions = [];
+    let isAnswering = false;
+
+    // Elements
+    const emojiTarget = document.getElementById('emoji-target');
+    const optionsGrid = document.getElementById('options-grid');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressDisplay = document.getElementById('progress-display');
+    const startScreen = document.getElementById('start-screen');
+    const winScreen = document.getElementById('win-screen');
+    const finalScore = document.getElementById('final-score');
+    const btnStart = document.getElementById('btn-start');
+    const btnRestart = document.getElementById('btn-restart');
+    const btnSpeak = document.getElementById('btn-speak');
+    const frame = document.getElementById('frame');
+
+    // เสียงเอฟเฟกต์
+    class SoundEffects {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playCorrect() {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.3, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.08 + 0.25);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.25);
+        });
+      }
+      playWrong() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.2);
+      }
+    }
+    const soundFx = new SoundEffects();
+
+    // เสียงพูดภาษาไทย
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'th-TH';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function initGame() {
+      currentQuestions = shuffle(ITEMS);
+      currentQuestionIndex = 0;
+      score = 0;
+      scoreDisplay.textContent = `⭐ ${score}`;
+      startScreen.classList.add('hidden');
+      winScreen.classList.add('hidden');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      isAnswering = false;
+      const current = currentQuestions[currentQuestionIndex];
+      
+      progressDisplay.textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+      emojiTarget.textContent = current.emoji;
+      
+      // ตั้งค่าบดบังภาพให้เห็นแค่นิดเดียว
+      emojiTarget.className = 'emoji-target tiny-hidden';
+
+      const wrongOptions = ITEMS.filter(item => item.name !== current.name);
+      const shuffledWrong = shuffle(wrongOptions).slice(0, 2);
+      const choices = shuffle([current, ...shuffledWrong]);
+
+      optionsGrid.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span class="option-emoji">${choice.emoji}</span> <span>${choice.name}</span>`;
+        btn.addEventListener('click', () => handleAnswer(choice, current, btn));
+        optionsGrid.appendChild(btn);
+      });
+
+      setTimeout(() => speakText('แอบมองแค่นี้ คือภาพอะไรเอ่ย?'), 300);
+    }
+
+    function handleAnswer(selected, correct, btnElement) {
+      if (isAnswering) return;
+      isAnswering = true;
+
+      if (selected.name === correct.name) {
+        btnElement.classList.add('btn-correct');
+        emojiTarget.className = 'emoji-target revealed'; // เฉลยเปิดเต็มรูป
+        soundFx.playCorrect();
+        spawnStars();
+        score += 1;
+        scoreDisplay.textContent = `⭐ ${score}`;
+        speakText(`ถูกต้องครับ! นี่คือ ${correct.name}`);
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+          } else {
+            winScreen.classList.remove('hidden');
+            finalScore.textContent = `น้องๆ ทายถูกทั้งหมด ${score} ข้อเลยครับ!`;
+            speakText('เก่งมากๆ เลยครับ! น้องๆ ตาไวมาก ทายถูกครบทุกข้อแล้ว!');
+          }
+        }, 1600);
+
+      } else {
+        btnElement.classList.add('btn-wrong');
+        soundFx.playWrong();
+        speakText('ยังไม่ใช่ครับ ลองใหม่อีกทีนะ');
+        
+        setTimeout(() => {
+          btnElement.classList.remove('btn-wrong');
+          isAnswering = false;
+        }, 800);
+      }
+    }
+
+    function spawnStars() {
+      for (let i = 0; i < 8; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-particle';
+        star.textContent = '⭐';
+        
+        const angle = (Math.PI * 2 / 8) * i;
+        const dist = 80 + Math.random() * 40;
+        const dx = `${Math.cos(angle) * dist}px`;
+        const dy = `${Math.sin(angle) * dist}px`;
+
+        star.style.setProperty('--dx', dx);
+        star.style.setProperty('--dy', dy);
+        star.style.left = '50%';
+        star.style.top = '50%';
+
+        frame.appendChild(star);
+        setTimeout(() => star.remove(), 800);
+      }
+    }
+
+    btnStart.addEventListener('click', initGame);
+    btnRestart.addEventListener('click', initGame);
+    btnSpeak.addEventListener('click', () => {
+      const current = currentQuestions[currentQuestionIndex];
+      if (current) speakText('แอบมองแค่นี้ คือภาพอะไรเอ่ย?');
+    });
+  </script>
+</body>
+</html>
